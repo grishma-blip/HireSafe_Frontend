@@ -96,99 +96,87 @@ document.addEventListener('DOMContentLoaded', function() {
         const jobDescription = document.getElementById('jobDescription').value.trim();
         const salaryRange = document.getElementById('salaryRange').value.trim();
         const telecommuting = document.getElementById('telecommuting').value;
+        const experience = document.getElementById('experience').value;
+        const employmentType = document.getElementById('employmentType').value;
+        const hasCompanyLogo = document.getElementById('hasCompanyLogo').value;
+        const requiredSkills = document.getElementById('requiredSkills').value.trim();
+        const benefits = document.getElementById('benefits').value.trim();
         
-        // Calculate fraud probability - Always show high fraud for demo
-        let probability = 85; // Always high fraud for demonstration
-        let riskFactors = ['Demo mode: Always showing fraud detection results'];
-        
-        // Still analyze input for educational purposes, but always show high risk
-        if (jobDescription.length < 100) {
-            riskFactors.push('Short job description (less than 100 characters)');
-        }
-        
-        if (!salaryRange || salaryRange === '') {
-            riskFactors.push('Missing salary information');
-        }
-        
-        const vagueTitles = ['worker', 'employee', 'staff', 'team member', 'assistant', 'specialist', 'associate'];
-        const isVagueTitle = vagueTitles.some(title => 
-            jobTitle.toLowerCase().includes(title)
-        );
-        if (isVagueTitle) {
-            riskFactors.push('Vague or generic job title');
-        }
-        
-        if (companyProfile.length < 50) {
-            riskFactors.push('Limited company information');
-        }
-        
-        if (telecommuting === 'yes' && salaryRange) {
-            const salaryNumbers = salaryRange.match(/\d+/g);
-            if (salaryNumbers && salaryNumbers.length > 0) {
-                const maxSalary = Math.max(...salaryNumbers.map(n => parseInt(n)));
-                if (maxSalary > 100000) {
-                    riskFactors.push('Unusually high salary for remote position');
-                }
-            }
-        }
-        
-        const urgentKeywords = ['urgent', 'immediate', 'asap', 'today', 'now', 'hiring immediately'];
-        const hasUrgentKeywords = urgentKeywords.some(keyword => 
-            jobDescription.toLowerCase().includes(keyword)
-        );
-        if (hasUrgentKeywords) {
-            riskFactors.push('Urgent hiring language detected');
-        }
-        
-        const paymentKeywords = ['payment', 'fee', 'pay', 'cost', 'investment', 'training fee'];
-        const hasPaymentKeywords = paymentKeywords.some(keyword => 
-            jobDescription.toLowerCase().includes(keyword)
-        );
-        if (hasPaymentKeywords) {
-            riskFactors.push('Payment or fee requests detected');
-        }
-        
-        const emailPattern = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/;
-        const hasEmailOnly = emailPattern.test(jobDescription) && !jobDescription.toLowerCase().includes('phone');
-        if (hasEmailOnly) {
-            riskFactors.push('Email-only communication requested');
-        }
-        
-        // Cap probability at 100%
-        probability = Math.min(probability, 100);
-        
-        // Determine risk level - Always show High risk for demo
-        let riskLevelText = 'High';
-        let riskClass = 'risk-high';
-        let recommendation = 'WARNING: This posting shows strong indicators of fraud. Do not proceed with this opportunity.';
-        
-        // Calculate confidence based on data completeness
-        let confidence = 60;
-        if (jobDescription.length > 200) confidence += 10;
-        if (companyProfile.length > 100) confidence += 10;
-        if (salaryRange) confidence += 10;
-        if (jobTitle && jobTitle.length > 5) confidence += 10;
-        
-        // Animate the results
+        // Show loading state
         resultBox.classList.remove('hidden');
+        document.getElementById('fraudProbability').textContent = 'Analyzing...';
+        document.getElementById('riskLevel').textContent = 'Processing...';
+        document.getElementById('confidenceText').textContent = '0%';
+        document.getElementById('recommendationText').textContent = 'Analyzing job posting for fraud indicators...';
         
+        // Clear previous risk factors
+        const riskFactorsList = document.getElementById('riskFactorsList');
+        riskFactorsList.innerHTML = '';
+        
+        // Prepare data for API
+        const jobData = {
+            title: jobTitle,
+            company_profile: companyProfile,
+            description: jobDescription,
+            salary_range: salaryRange,
+            telecommuting: telecommuting,
+            experience_required: experience,
+            employment_type: employmentType,
+            has_company_logo: hasCompanyLogo,
+            required_skills: requiredSkills,
+            benefits: benefits
+        };
+        
+        // Call backend API
+        fetch('https://hiresafe-backend-fxxk.onrender.com/api/analyze', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(jobData)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Update UI with backend results
+            updateResultsWithBackendData(data);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            // Fallback to mock data if backend fails
+            console.log('Backend unavailable, using mock data');
+            updateResultsWithMockData(jobData);
+        });
+    });
+    
+    function updateResultsWithBackendData(data) {
         // Animate probability counter
         let currentProb = 0;
-        const increment = probability / 50;
+        const targetProb = data.fraud_probability || 85;
+        const increment = targetProb / 50;
         const timer = setInterval(() => {
             currentProb += increment;
-            if (currentProb >= probability) {
-                currentProb = probability;
+            if (currentProb >= targetProb) {
+                currentProb = targetProb;
                 clearInterval(timer);
             }
-            fraudProbability.textContent = Math.round(currentProb) + '%';
+            document.getElementById('fraudProbability').textContent = Math.round(currentProb) + '%';
         }, 20);
         
         // Update risk level
-        riskLevel.textContent = riskLevelText;
-        riskLevel.className = 'result-value ' + riskClass;
+        const riskLevelText = data.risk_level || 'High';
+        const riskClass = data.risk_level === 'High' ? 'risk-high' : 
+                         data.risk_level === 'Medium' ? 'risk-medium' : 'risk-low';
         
-        // Update confidence bar
+        document.getElementById('riskLevel').textContent = riskLevelText;
+        document.getElementById('riskLevel').className = 'result-value ' + riskClass;
+        
+        // Update confidence
+        const confidence = data.confidence || 85;
         setTimeout(() => {
             document.getElementById('confidenceFill').style.width = confidence + '%';
             document.getElementById('confidenceText').textContent = confidence + '%';
@@ -197,8 +185,9 @@ document.addEventListener('DOMContentLoaded', function() {
         // Update risk factors
         const riskFactorsList = document.getElementById('riskFactorsList');
         riskFactorsList.innerHTML = '';
-        if (riskFactors.length > 0) {
-            riskFactors.forEach(factor => {
+        
+        if (data.risk_factors && data.risk_factors.length > 0) {
+            data.risk_factors.forEach(factor => {
                 const li = document.createElement('li');
                 li.textContent = factor;
                 riskFactorsList.appendChild(li);
@@ -211,7 +200,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Update recommendation
-        document.getElementById('recommendationText').textContent = recommendation;
+        document.getElementById('recommendationText').textContent = 
+            data.recommendation || 'WARNING: This posting shows strong indicators of fraud. Do not proceed with this opportunity.';
         
         // Scroll to results
         setTimeout(() => {
@@ -221,10 +211,27 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }, 100);
         
-        // Log risk factors for debugging
-        console.log('Risk Factors:', riskFactors);
-        console.log('Calculated Probability:', probability + '%');
-    });
+        // Log results for debugging
+        console.log('Backend Results:', data);
+    }
+    
+    function updateResultsWithMockData(jobData) {
+        // Fallback mock data
+        const mockData = {
+            fraud_probability: 85,
+            risk_level: 'High',
+            confidence: 85,
+            risk_factors: [
+                'Demo mode: Backend unavailable, using mock data',
+                'Short job description detected',
+                'Missing salary information',
+                'Generic job title detected'
+            ],
+            recommendation: 'WARNING: This posting shows strong indicators of fraud. Do not proceed with this opportunity.'
+        };
+        
+        updateResultsWithBackendData(mockData);
+    }
 });
 
 // ===== SMOOTH SCROLL FOR NAVIGATION LINKS =====
