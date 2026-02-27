@@ -10,30 +10,11 @@ HireSafe is a modern web application that uses advanced machine learning algorit
 
 ### Group 12 - Elon Musk Batch (2024-28)
 
-1. **Pranav Kale** - Project Lead & ML Engineer
-   - Expert in statistical analysis and pattern recognition
-   - Previously led data science teams at Google and Amazon
-   - LinkedIn: [pranav-kale-680083321](https://www.linkedin.com/in/pranav-kale-680083321/)
-
-2. **Shweta Shetty** - UX/UI Designer & Product Manager
-   - MBA from Harvard Business School
-   - Specializes in market research and user experience design for tech products
-   - LinkedIn: [shweta-shetty-340196332](https://www.linkedin.com/in/shweta-shetty-340196332/)
-
-3. **Grishma Thakare** - NLP Research Lead
-   - PhD in Natural Language Processing
-   - Published 15+ papers on text analysis and fraud detection algorithms
-   - LinkedIn: [grishma-thakare-793732285](https://www.linkedin.com/in/grishma-thakare-793732285/)
-
-4. **Kirthish Shetty** - Full-Stack Developer
-   - PhD in Machine Learning from Stanford
-   - 8+ years building fraud detection systems for Fortune 500 companies
-   - LinkedIn: [kirthish-s-332088304](https://www.linkedin.com/in/kirthish-s-332088304/)
-
-5. **Arham Khan** - Cybersecurity Expert
-   - Certified Ethical Hacker with 10+ years in cybersecurity
-   - Focuses on identifying online fraud patterns
-   - LinkedIn: [arham-khan-00a16332b](https://www.linkedin.com/in/arham-khan-00a16332b/)
+- **Pranav Kale**
+- **Shweta Shetty** 
+- **Grishma Thakare**
+- **Kirthish Shetty**
+- **Arham Khan**
 
 ## 🚀 Features
 
