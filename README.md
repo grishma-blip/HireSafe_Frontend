@@ -181,7 +181,7 @@ CMD ["nginx", "-g", "daemon off;"]
 4. **📊 Review**: Check risk level, confidence score, and recommendations
 5. **🔍 Explore**: Navigate through other sections for more information
 
-### � Analysis Features
+### 🎯 Analysis Features
 
 | Input Field | Purpose | Tips |
 |-------------|---------|-------|
